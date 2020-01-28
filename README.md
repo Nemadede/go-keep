@@ -1,2 +1,2 @@
 # go-keep
-building google keep with Flask and Vue js
+building google keep API with Flask 
