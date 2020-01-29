@@ -11,16 +11,33 @@ notes = Blueprint('notes',__name__)
 @token_required
 def create_note():
     data=request.get_json()
-    user_id = data['user_id'] # TODO add label
+    user_id = data['user_id']
+    title = data['title']
+    body = data['body']
     user = User.query.filter_by(id=user_id).first()
     if not user:
         return make_response('invalid user',404)
-    title = data['title']
-    body = data['body']
-    new_note = Notes(title=title,body=body,user_id=user_id)
+    elif data['label']:
+        labels_ = data['label']
+        for l in labels_:
+            label = Label.query.filter_by(id=l).first()
+            if not label:
+                return jsonify({'message':'invalid label, cannot create note'})
+        new_note = Notes(title=title,body=body,user_id=user_id,label=labels_)
+        db.session.add(new_note)
+        db.session.commit()
+        print(new_note)
+        for l in labels_:
+            label = Label.query.filter_by(id=l).first()
+            new_note.labels.append(label)
+        # new_note.labels=labels_
+        db.session.commit()
+        return jsonify({'message':'Note created'})
+    new_note = Notes(title=title,body=body,user_id=user_id,label=[])
     db.session.add(new_note)
     db.session.commit()
     return jsonify({'message':'Note created'})
+    
 
 # get all notes     
 @notes.route('/note', methods=['GET'])

@@ -20,10 +20,13 @@ def create_label():
         return make_response('Label name Should not contain spaces',400)
     elif len(name) > 25:
         return make_response('Label name too long',400)
-    user = data['user_id']
-    label = Label.query.filter_by(name=name,user_id=user).first()
+    user_id = data['user_id']
+    user = User.query.filter_by(id=user_id).first()
+    if not user:
+        return make_response('null user cannot create label',400)
+    label = Label.query.filter_by(name=name,user_id=user.id).first()
     if not label:
-        new_label = Label(name=name)
+        new_label = Label(name=name,user_id=user_id)
         db.session.add(new_label)
         db.session.commit()
         return jsonify({'message':'label created'})
