@@ -11,20 +11,22 @@ class User(db.Model):
     user_name = db.Column(db.String(50))
     email = db.Column(db.String(100),unique=True)
     password = db.Column(db.String(80))
+    notes = db.relationship('Notes',backref=db.backref('note',lazy=True))
 
 class Notes(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     title= db.Column(db.String(100), unique=False)
     body = db.Column(db.Text, unique=False)
-    label= db.relationship('Label',secondary=notes_label,backref=db.backref('labels',lazy='dynamic'))
+    labels= db.relationship('Label',secondary=notes_label)
     label = db.Column(db.ARRAY(db.Integer),nullable=True)
     user_id = db.Column(db.Integer,db.ForeignKey('user.id'),nullable=False )
-    user = db.relationship('User',backref=db.backref('note',lazy=True))
+    
 
 class Label(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     name = db.Column(db.String(50),nullable=False,unique=False)
     user_id = db.Column(db.Integer,db.ForeignKey('user.id'),nullable=False )
+    notes= db.relationship('Notes',secondary=notes_label)
     user = db.relationship('User',backref=db.backref('label',lazy=True))
     
     def __init__(self,name,user_id):
