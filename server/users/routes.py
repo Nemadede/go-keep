@@ -6,6 +6,7 @@ from server.models import *
 from server.utils import *
 import datetime
 import jwt
+from server.config import Config
 
 
 
@@ -15,7 +16,6 @@ users = Blueprint('users',__name__)
 @users.route('/user',methods=['POST'])
 def creat_user():
     data=request.get_json()
-    # TODO when a wrong key is passed, catch the error
     email = data['email']
     user = User.query.filter_by(email=email).first()
     if not user:
@@ -81,7 +81,7 @@ def login():
     if not user:
         return make_response('could not verify',401,{'WWW-Authenticate':'Basic realm="Login required"'})
     if check_password_hash(user.password,auth.password):
-        token = jwt.encode({"email":user.email,"exp":datetime.datetime.utcnow()+datetime.timedelta(days=7,minutes=30)},app.config['SECRET_KEY'])
+        token = jwt.encode({"email":user.email,"exp":datetime.datetime.utcnow()+datetime.timedelta(days=7,minutes=30)},Config.SECRET_KEY)
         return jsonify({'token':token.decode('UTF-8')})
     return jsonify({'message':'wrong credentials'})
 
